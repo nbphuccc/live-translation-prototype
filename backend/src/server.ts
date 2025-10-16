@@ -258,10 +258,6 @@ socket.on("audio-chunk", async (data) => {
   }
 });
 
-
-
-
-
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
   });
