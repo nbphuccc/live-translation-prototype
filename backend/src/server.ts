@@ -34,6 +34,12 @@ export const INADMISSIBLE_PATTERNS: RegExp[] = [
   /^goodbye[.!?]*$/i,
   /^see you( later| next time)?[.!?]*$/i,
 
+  // newly added: outro / comment request / auto-transcription footers
+  /^let me know in the comments what you think[.!?]*$/i,
+  /^transcribed by https?:\/\/\S+/i,
+  /^thanks for watching[.!?]*$/i,
+  /^excited!? thanks for watching[.!?]*$/i,
+
   // filler expansions & generic phrases
   /subscribe/i,
   /this podcast/i,
@@ -60,8 +66,10 @@ export const INADMISSIBLE_PATTERNS: RegExp[] = [
   // hallucinatory continuations or expansions
   /\b(and so on|etc)\b/i,
   /(and then).*\1/,
-];
 
+  // 🚫 emojis or emoji-containing lines
+  /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u,
+];
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -163,7 +171,6 @@ export async function transcribeAudio(rawBuffer: ArrayBuffer): Promise<string> {
   }
 }
 
-
 function parseGlossaryCSV(csv: string | null): Record<string, string> {
   if (!csv) return {};
   const lines = csv.trim().split("\n").slice(1); // skip header
@@ -174,7 +181,6 @@ function parseGlossaryCSV(csv: string | null): Record<string, string> {
   }
   return glossary;
 }
-
 
 async function translateTextGPT(
   text: string,

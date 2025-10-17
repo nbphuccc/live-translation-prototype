@@ -14,7 +14,6 @@ function App() {
   const socketRef = useRef<Socket | null>(null);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
 
-
   useEffect(() => {
     const socket = io(BACKEND_URL);
     socketRef.current = socket;
@@ -86,8 +85,6 @@ function App() {
     });
   }
 );
-
-
   // Cleanup on unmount
   return () => {
     socket.off("audio-stream");
@@ -232,7 +229,6 @@ function parseCSV(csv: string): string[][] {
     .split("\n")
     .map(line => line.split(",").map(cell => cell.trim()));
 }
-
 
   return (
     <div className="page-container">
