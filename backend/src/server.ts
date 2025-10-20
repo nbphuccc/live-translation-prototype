@@ -67,7 +67,7 @@ export const INADMISSIBLE_PATTERNS: RegExp[] = [
   /\b(and so on|etc)\b/i,
   /(and then).*\1/,
 
-  // 🚫 emojis or emoji-containing lines
+  // emojis or emoji-containing lines
   /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u,
 ];
 
@@ -244,19 +244,19 @@ io.on("connection", (socket) => {
     }
   });
 
-// 1️⃣ Receive audio chunks from host
+// Receive audio chunks from host
 socket.on("audio-chunk", async (data) => {
   const { buffer, timestamp } = data;
 
   try {
-    // 2️⃣ Process: transcribe + translate immediately
+    // Process: transcribe + translate immediately
     const transcript = await transcribeAudio(buffer);
     console.log(transcript);
 
     const translation = await translateTextGPT(transcript, "vi", glossaryCSV!);
     console.log(translation);
 
-    // 3️⃣ Send both audio and translation instantly to attendees
+    // Send both audio and translation instantly to attendees
     io.to(activeRoomId).emit("audio-stream", { buffer, timestamp });
     io.to(activeRoomId).emit("translated-caption", { transcript, translation, timestamp });
   } catch (err) {
@@ -287,4 +287,4 @@ app.get("/glossary", (req, res) => {
 });
 
 const PORT = 5000;
-server.listen(PORT, () => console.log(`✅ Backend running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

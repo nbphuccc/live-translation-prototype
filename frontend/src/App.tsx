@@ -17,21 +17,21 @@ function App() {
   useEffect(() => {
     const socket = io(BACKEND_URL);
     socketRef.current = socket;
-    socket.on("connect", () => setStatus("Connected to backend ✅"));
+    socket.on("connect", () => setStatus("Connected to backend"));
 
     socket.on("room-created", (id: string) => {
       setRoomId(id);
       setRole("host");
-      setStatus(`🟢 Room hosted successfully!`);
+      setStatus(`Room hosted successfully!`);
     });
 
     socket.on("room-joined", (id: string) => {
       setRoomId(id);
       setRole("attendee");
-      setStatus(`🟢 Joined room successfully`);
+      setStatus(`Joined room successfully`);
     });
 
-    socket.on("no-room", () => setStatus("❌ No room available to join yet."));
+    socket.on("no-room", () => setStatus("No room available to join yet."));
 
     return () => {
       socket.off("room-created");
@@ -143,7 +143,7 @@ const handleGlossaryUpload = async () => {
     const data = await res.json();
     console.log("Backend response:", data);
 
-    // ✅ Show success message
+    // Show success message
     setFlashMessage("Glossary uploaded!");
     setTimeout(() => setFlashMessage(null), 2500);
   } catch (err) {
@@ -160,15 +160,15 @@ const handleStartMeeting = async () => {
     const audioCtx = new AudioContext();
     const source = audioCtx.createMediaStreamSource(stream);
 
-    // 1️⃣ Load worklet
+    // Load worklet
     await audioCtx.audioWorklet.addModule('/pcm-processor.js');
 
-    // 2️⃣ Create worklet node
+    // Create worklet node
     const workletNode = new AudioWorkletNode(audioCtx, 'pcm-processor');
     source.connect(workletNode);
     workletNode.connect(audioCtx.destination); // optional for monitoring
 
-    // 3️⃣ Accumulate frames for larger chunks
+    // Accumulate frames for larger chunks
     const framesPerChunk = Math.floor(audioCtx.sampleRate * (CHUNK_MS / 1000));
     let pcmBufferQueue: Float32Array[] = [];
     let queuedFrames = 0;
@@ -191,7 +191,7 @@ const handleStartMeeting = async () => {
       }
     };
 
-    console.log("🎤 Meeting started, sending larger PCM audio chunks via AudioWorklet");
+    console.log("Meeting started, sending larger PCM audio chunks via AudioWorklet");
     setFlashMessage("Meeting Started!");
     setTimeout(() => setFlashMessage(null), 2500);
   } catch (err) {
