@@ -95,6 +95,8 @@ let glossaryCSV: string | null = null;
 
 let activeRoomId: string | null = null; // store only one room for now
 
+let targetLang: string = "Vietnamese" // Default as Vietnamese, change later to make setting language before joining room. This shows bias
+
 /**
  * Transcode raw PCM 16-bit buffer to WAV using FFmpeg and save to temp file
  */
@@ -184,12 +186,14 @@ function parseGlossaryCSV(csv: string | null): Record<string, string> {
 
 async function translateTextGPT(
   text: string,
-  targetLang = "vi",
+  targetLang: string,
   glossaryCSV: string
 ): Promise<string> {
   if (!text.trim()) return "";
 
   const glossary = parseGlossaryCSV(glossaryCSV);
+
+  console.log("Language being sent to translate function: ", targetLang);
 
   // Create glossary instructions
   const glossaryInstructions = Object.entries(glossary)
@@ -197,7 +201,7 @@ async function translateTextGPT(
     .join(", ");
 
   const prompt = `
-You are a translation assistant. Translate all text from English to Vietnamese.
+You are a translation assistant. Translate all text from English to ${targetLang}.
 Use these glossary rules: ${glossaryInstructions}.
 Always preserve technical terms exactly as specified.
 Translate the following text:
@@ -247,13 +251,14 @@ io.on("connection", (socket) => {
 // Receive audio chunks from host
 socket.on("audio-chunk", async (data) => {
   const { buffer, timestamp } = data;
+  console.log(buffer);
 
   try {
     // Process: transcribe + translate immediately
     const transcript = await transcribeAudio(buffer);
     console.log(transcript);
 
-    const translation = await translateTextGPT(transcript, "vi", glossaryCSV!);
+    const translation = await translateTextGPT(transcript, targetLang, glossaryCSV!);
     console.log(translation);
 
     // Send both audio and translation instantly to attendees
@@ -285,6 +290,14 @@ app.get("/glossary", (req, res) => {
   if (!glossaryCSV) return res.status(404).json({ message: "No glossary found" });
   return res.status(200).send(glossaryCSV);
 });
+
+app.post("/set-language", (req, res) => {
+  targetLang = req.body.language;
+  console.log("Attendee language changed to:", targetLang);
+
+  res.json({ success: true });
+});
+
 
 const PORT = 5000;
 server.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

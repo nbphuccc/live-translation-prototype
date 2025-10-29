@@ -13,6 +13,8 @@ function App() {
   const [transcripts, setTranscripts] = useState<string[]>([]);
   const socketRef = useRef<Socket | null>(null);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
+  const [selectedLang, setSelectedLang] = useState("vi");
+
 
   useEffect(() => {
     const socket = io(BACKEND_URL);
@@ -199,6 +201,28 @@ const handleStartMeeting = async () => {
   }
 };
 
+const handleLangChoice = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const lang = e.target.value;
+  setSelectedLang(lang);
+  console.log(lang)
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/set-language`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language: lang }),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to set language:", await res.text());
+    } else {
+      console.log(`Language changed to ${lang}`);
+    }
+  } catch (err) {
+    console.error("Error sending language choice:", err);
+  }
+};
+
 // Merge multiple Float32Array frames into one
 function mergeFloat32Arrays(arrays: Float32Array[]): Float32Array {
   const length = arrays.reduce((sum, arr) => sum + arr.length, 0);
@@ -281,31 +305,49 @@ function parseCSV(csv: string): string[][] {
       )}
 
       {role === "attendee" && (
-        <div className="attendee-view">
+  <div className="attendee-view">
+    {/* Language selection dropdown */}
+    <div className="language-select mb-4">
+      <label htmlFor="lang" className="mr-2 font-semibold">
+        Choose Translation Language:
+      </label>
+      <select
+        id="lang"
+        value={selectedLang}
+        onChange={handleLangChoice}
+        className="border rounded px-2 py-1"
+      >
+        <option value="Vietnamese">Vietnamese</option>
+        <option value="Hungarian">Hungarian</option>
+        <option value="Arabic">Arabic</option>
+        <option value="Spanish">Spanish</option>
+      </select>
+    </div>
 
-          <div className="trans-caption-container">
-            {/* Left: Original transcript */}
-            <div className="transcript-display">
-              <h3>Transcript</h3>
-              {transcripts.length > 0 ? (
-                transcripts.map((line, i) => <p key={i}>{line}</p>)
-              ) : (
-                <p className="placeholder">Waiting for speech...</p>
-              )}
-            </div>
+    <div className="trans-caption-container">
+      {/* Left: Original transcript */}
+      <div className="transcript-display">
+        <h3>Transcript</h3>
+        {transcripts.length > 0 ? (
+          transcripts.map((line, i) => <p key={i}>{line}</p>)
+        ) : (
+          <p className="placeholder">Waiting for speech...</p>
+        )}
+      </div>
 
-            {/* Right: Translated captions */}
-            <div className="caption-display">
-              <h3>Translation</h3>
-              {captions.length > 0 ? (
-                captions.map((line, i) => <p key={i}>{line}</p>)
-              ) : (
-                <p className="placeholder">Waiting for translation...</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Right: Translated captions */}
+      <div className="caption-display">
+        <h3>Translation</h3>
+        {captions.length > 0 ? (
+          captions.map((line, i) => <p key={i}>{line}</p>)
+        ) : (
+          <p className="placeholder">Waiting for translation...</p>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   </div>
 
